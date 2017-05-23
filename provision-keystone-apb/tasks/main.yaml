@@ -1,0 +1,50 @@
+- name: Create project
+  k8s_v1_namespace:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: openstack
+    state: present
+    debug: yes
+  register: create_project
+
+- name: Create keystone service 
+  k8s_v1_service:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone
+    namespace: openstack 
+    state: present
+    ports:
+      - port: 5000
+        name: keystone-api-public
+      - port: 35357
+        name: keystone-api-admin
+    selector:
+      app: keystone-api
+  register: create_service 
+
+- name: Create keystone service 
+  k8s_v1beta_deployment:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    replicas: 1
+    revisionHistoryLimit: 3
+    spec_template_metadata_labels:
+      app: keystone-api
+    spec_service_name: keystone-api
+    containers:
+      - name: keystone-api
+        image: docker.io/kolla/centos-binary-keystone:3.0.3
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: api-public
+            containerPort: 5000
+          - name: api-admin
+            containerPort: 35357
+    state: present
+  register: create_service
+
+
