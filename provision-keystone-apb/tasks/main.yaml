@@ -9,6 +9,7 @@
   register: create_project
 
 - name: Create keystone configmaps 
+  ignore_errors: yes
   k8s_v1_config_map:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
