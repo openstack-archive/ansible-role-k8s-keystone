@@ -1,0 +1,28 @@
+- name: Delete keystone deployment 
+  k8s_v1beta1_deployment:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone-api
+    namespace: openstack 
+    state: absent 
+
+- name: Delete keystone service 
+  k8s_v1_service:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone
+    namespace: openstack 
+    state: absent 
+
+- name: Delete keystone configmaps 
+  ignore_errors: yes
+  k8s_v1_config_map:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone
+    namespace: openstack 
+    state: absent 
+    debug: yes
