@@ -218,6 +218,82 @@
           WSGIPassAuthorization On
         </VirtualHost>
 
+- name: Create keystone job 
+  k8s_v1_job:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone-db-sync 
+    namespace: openstack 
+    state: present
+    spec_template_metadata_annotations:
+      pod.beta.kubernetes.io/init-containers: '[
+          {
+            "name": "keystone-db-create",
+            "image": "tripleoupstream/centos-binary-mariadb",
+            "imagePullPolicy": "IfNotPresent",
+            "restartPolicy": "OnFailure",
+            "command": [
+              "mysql",
+              "-h",
+              "mariadb",
+              "-u",
+              "root",
+              "--password=weakpassword",
+              "-e",
+              "create database if not exists keystone;"
+            ]
+          }
+        ]'
+    restart_policy: OnFailure 
+    containers:
+      - image: tripleoupstream/centos-binary-keystone
+        name: keystone-db-sync
+        env:
+          - name: KOLLA_CONFIG_STRATEGY
+            value: COPY_ALWAYS
+          - name: KOLLA_BOOTSTRAP
+            value: ''
+        volume_mounts:
+        - name: kolla-config
+          mountPath: /var/lib/kolla/config_files/
+        - name: keystone-fernet
+          mountPath: /etc/keystone/fernet-keys
+    volumes:
+      - name: kolla-config
+        config_map:
+          name: keystone 
+      - name: keystone-fernet
+    state: present
+
+- name: Create keystone fernet job 
+  k8s_v1_job:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone-fernet
+    namespace: openstack 
+    state: present
+    restart_policy: OnFailure 
+    containers:
+      - image: tripleoupstream/centos-binary-keystone-fernet
+        name: keystone-fernet-bootstrap
+        command: ["kolla_keystone_bootstrap", "keystone", "keystone"]
+        env:
+          - name: KOLLA_CONFIG_STRATEGY
+            value: COPY_ALWAYS
+        volume_mounts:
+        - name: kolla-config
+          mountPath: /var/lib/kolla/config_files/
+        - name: keystone-fernet
+          mountPath: /etc/keystone/fernet-keys
+    volumes:
+      - name: kolla-config
+        config_map:
+          name: keystone 
+      - name: keystone-fernet
+    state: present
+
 - name: Create keystone service 
   k8s_v1_service:
     host: "{{coe_host}}"
@@ -250,11 +326,26 @@
       - name: keystone-api
         image: docker.io/kolla/centos-binary-keystone:3.0.3
         imagePullPolicy: IfNotPresent
+        env:
+        - name: KOLLA_CONFIG_STRATEGY
+          value: COPY_ALWAYS
+        - name: KOLLA_KUBERNETES
+          value: ""
         ports:
           - name: api-public
             containerPort: 5000
           - name: api-admin
             containerPort: 35357
+        volume_mounts:
+        - name: kolla-config
+          mountPath: /var/lib/kolla/config_files/
+        - name: keystone-fernet
+          mountPath: /etc/keystone/fernet-keys
+    volumes:
+      - name: kolla-config
+        config_map:
+          name: keystone 
+      - name: keystone-fernet
     state: present
   register: create_service
 

@@ -1,3 +1,21 @@
+- name: Delete keystone fernet job
+  k8s_v1_job:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone-fernet
+    namespace: openstack 
+    state: absent 
+
+- name: Delete keystone db-sync job 
+  k8s_v1_job:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone-db-sync
+    namespace: openstack 
+    state: absent 
+
 - name: Delete keystone deployment 
   k8s_v1beta1_deployment:
     host: "{{coe_host}}"
