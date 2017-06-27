@@ -8,14 +8,54 @@
     debug: yes
   register: create_project
 
-- name: Create keystone configmaps 
+- name: Upload config files
+  template: src="{{item}}"
+            dest="/tmp/{{item}}"
+            backup=yes
+            mode=0644
+  with_items:
+    - httpd.conf
+    - httpd-keystone-main.conf
+    - keystone-schema.yaml
+
+- name: Run oslo.config
+  include_role:
+    name: os-gen-config
+  vars:
+    config_schema: "/tmp/keystone-schema.yaml"
+    config_show_help: false
+    config_show_defaults: false
+    dest: "/tmp/keystone.conf"
+    config_data:
+        DEFAULT:
+          bind_host: "0.0.0.0"
+          sql_connection: "mysql+pymysql://root:weakpassword@mariadb:3306/keystone"
+        token:
+          provider: "fernet"
+
+- name: Read configs into memory
+  slurp:
+    src: "/tmp/httpd-keystone-main.conf"
+  register: "httpd_keystone_main_conf"
+
+- name: Read configs into memory
+  slurp:
+    src: "/tmp/httpd.conf"
+  register: "httpd_conf"
+
+- name: Read configs into memory
+  slurp:
+    src: "/tmp/keystone.conf"
+  register: "keystone_conf"
+
+- name: Create keystone configmaps
   ignore_errors: yes
   k8s_v1_config_map:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone
-    namespace: openstack 
+    namespace: openstack
     state: present
     debug: yes
     labels:
@@ -52,179 +92,20 @@
             ]
         }
       keystone.conf: |
-        [DEFAULT]
-        bind_host = 0.0.0.0
-        sql_connection=mysql+pymysql://root:weakpassword@mariadb:3306/keystone
-        [token]
-        provider=fernet
+        {{keystone_conf['content'] | b64decode}}
       httpd.conf: |
-        Listen *:5000
-        Listen *:35357
-    
-        ServerRoot "/etc/httpd"
-        DocumentRoot "/var/www/html"
-        User apache
-        Group apache
-    
-        Include conf.modules.d/*.conf
-    
-        <Directory />
-            AllowOverride none
-            Require all denied
-        </Directory>
-    
-        <Directory "/var/www">
-            AllowOverride None
-            # Allow open access:
-            Require all granted
-        </Directory>
-    
-        <Directory "/var/www/cgi-bin">
-            AllowOverride None
-            Options None
-            Require all granted
-        </Directory>
-    
-        <IfModule dir_module>
-            DirectoryIndex index.html
-        </IfModule>
-    
-        <Files ".ht*">
-            Require all denied
-        </Files>
-    
-        ErrorLog /dev/stderr
-        <IfModule log_config_module>
-            LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
-            LogFormat "%h %l %u %t \"%r\" %>s %b" common
-    
-            <IfModule logio_module>
-              # You need to enable mod_logio.c to use %I and %O
-              LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
-            </IfModule>
-    
-            CustomLog /dev/stdout combined
-        </IfModule>
-    
-        <IfModule mime_module>
-            #
-            # TypesConfig points to the file containing the list of mappings from
-            # filename extension to MIME-type.
-            #
-            TypesConfig /etc/mime.types
-    
-            #
-            # AddType allows you to add to or override the MIME configuration
-            # file specified in TypesConfig for specific file types.
-            #
-            #AddType application/x-gzip .tgz
-            #
-            # AddEncoding allows you to have certain browsers uncompress
-            # information on the fly. Note: Not all browsers support this.
-            #
-            #AddEncoding x-compress .Z
-            #AddEncoding x-gzip .gz .tgz
-            #
-            # If the AddEncoding directives above are commented-out, then you
-            # probably should define those extensions to indicate media types:
-            #
-            AddType application/x-compress .Z
-            AddType application/x-gzip .gz .tgz
-    
-            #
-            # AddHandler allows you to map certain file extensions to "handlers":
-            # actions unrelated to filetype. These can be either built into the server
-            # or added with the Action directive (see below)
-            #
-            # To use CGI scripts outside of ScriptAliased directories:
-            # (You will also need to add "ExecCGI" to the "Options" directive.)
-            #
-            #AddHandler cgi-script .cgi
-    
-            # For type maps (negotiated resources):
-            #AddHandler type-map var
-    
-            #
-            # Filters allow you to process content before it is sent to the client.
-            #
-            # To parse .shtml files for server-side includes (SSI):
-            # (You will also need to add "Includes" to the "Options" directive.)
-            #
-            AddType text/html .shtml
-            AddOutputFilter INCLUDES .shtml
-        </IfModule>
-    
-        AddDefaultCharset UTF-8
-    
-        <IfModule mime_magic_module>
-            #
-            # The mod_mime_magic module allows the server to use various hints from the
-            # contents of the file itself to determine its type.  The MIMEMagicFile
-            # directive tells the module where the hint definitions are located.
-            #
-            MIMEMagicFile conf/magic
-        </IfModule>
-    
-        EnableSendfile on
-    
-        # Supplemental configuration
-        #
-        # Load config files in the "/etc/httpd/conf.d" directory, if any.
-        IncludeOptional conf.d/*.conf
+        {{httpd_conf['content'] | b64decode}}
       httpd-keystone-main.conf: |
-        <VirtualHost *:5000>
-          ## Vhost docroot
-          DocumentRoot "/var/www/cgi-bin/keystone"
-    
-          ## Directories, there should at least be a declaration for /var/www/cgi-bin/keystone
-    
-          <Directory "/var/www/cgi-bin/keystone">
-            Options Indexes FollowSymLinks MultiViews
-            AllowOverride None
-            Require all granted
-          </Directory>
-    
-          ## Logging
-          # ErrorLog "/var/log/httpd/keystone_wsgi_main_error.log"
-          ServerSignature Off
-          # CustomLog "/var/log/httpd/keystone_wsgi_main_access.log" combined
-          WSGIApplicationGroup %{GLOBAL}
-          WSGIDaemonProcess keystone_main display-name=keystone-main group=keystone processes=2 threads=1 user=keystone
-          WSGIProcessGroup keystone_main
-          WSGIScriptAlias / "/var/www/cgi-bin/keystone/main"
-          WSGIPassAuthorization On
-        </VirtualHost>
-      httpd-keystone-admin.conf: |
-        <VirtualHost *:35357>
-          ## Vhost docroot
-          DocumentRoot "/var/www/cgi-bin/keystone"
-    
-          ## Directories, there should at least be a declaration for /var/www/cgi-bin/keystone
-    
-          <Directory "/var/www/cgi-bin/keystone">
-            Options Indexes FollowSymLinks MultiViews
-            AllowOverride None
-            Require all granted
-          </Directory>
-    
-          ## Logging
-          # ErrorLog "/var/log/httpd/keystone_wsgi_admin_error.log"
-          ServerSignature Off
-          # CustomLog "/var/log/httpd/keystone_wsgi_admin_access.log" combined
-          WSGIApplicationGroup %{GLOBAL}
-          WSGIDaemonProcess keystone_admin display-name=keystone-admin group=keystone processes=2 threads=1 user=keystone
-          WSGIProcessGroup keystone_admin
-          WSGIScriptAlias / "/var/www/cgi-bin/keystone/admin"
-          WSGIPassAuthorization On
-        </VirtualHost>
+        {{httpd_keystone_main_conf['content'] | b64decode}}
 
-- name: Create keystone job 
+
+- name: Create keystone job
   k8s_v1_job:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
-    name: keystone-db-sync 
-    namespace: openstack 
+    name: keystone-db-sync
+    namespace: openstack
     state: present
     spec_template_metadata_annotations:
       pod.beta.kubernetes.io/init-containers: '[
@@ -245,7 +126,7 @@
             ]
           }
         ]'
-    restart_policy: OnFailure 
+    restart_policy: OnFailure
     containers:
       - image: tripleoupstream/centos-binary-keystone
         name: keystone-db-sync
@@ -262,19 +143,19 @@
     volumes:
       - name: kolla-config
         config_map:
-          name: keystone 
+          name: keystone
       - name: keystone-fernet
     state: present
 
-- name: Create keystone fernet job 
+- name: Create keystone fernet job
   k8s_v1_job:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone-fernet
-    namespace: openstack 
+    namespace: openstack
     state: present
-    restart_policy: OnFailure 
+    restart_policy: OnFailure
     containers:
       - image: tripleoupstream/centos-binary-keystone-fernet
         name: keystone-fernet-bootstrap
@@ -290,17 +171,17 @@
     volumes:
       - name: kolla-config
         config_map:
-          name: keystone 
+          name: keystone
       - name: keystone-fernet
     state: present
 
-- name: Create keystone service 
+- name: Create keystone service
   k8s_v1_service:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone
-    namespace: openstack 
+    namespace: openstack
     state: present
     ports:
       - port: 5000
@@ -309,15 +190,15 @@
         name: keystone-api-admin
     selector:
       app: keystone-api
-  register: create_service 
+  register: create_service
 
-- name: Create keystone deployment 
+- name: Create keystone deployment
   k8s_v1beta1_deployment:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone-api
-    namespace: openstack 
+    namespace: openstack
     replicas: 1
     spec_revision_history_limit: 3
     spec_template_metadata_labels:
@@ -344,9 +225,7 @@
     volumes:
       - name: kolla-config
         config_map:
-          name: keystone 
+          name: keystone
       - name: keystone-fernet
     state: present
   register: create_service
-
-
