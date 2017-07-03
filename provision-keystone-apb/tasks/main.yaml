@@ -16,6 +16,7 @@
   with_items:
     - httpd.conf
     - httpd-keystone-main.conf
+    - httpd-keystone-admin.conf
     - keystone-schema.yaml
 
 - name: Run oslo.config
@@ -27,16 +28,22 @@
     config_show_defaults: false
     dest: "/tmp/keystone.conf"
     config_data:
-        DEFAULT:
-          bind_host: "0.0.0.0"
-          sql_connection: "mysql+pymysql://root:weakpassword@mariadb:3306/keystone"
-        token:
-          provider: "fernet"
+      DEFAULT:
+        public_bind_host: "0.0.0.0"
+      database:
+        connection: "mysql+pymysql://root:weakpassword@mariadb:3306/keystone"
+      token:
+        provider: "fernet"
 
 - name: Read configs into memory
   slurp:
     src: "/tmp/httpd-keystone-main.conf"
   register: "httpd_keystone_main_conf"
+
+- name: Read configs into memory
+  slurp:
+    src: "/tmp/httpd-keystone-admin.conf"
+  register: "httpd_keystone_admin_conf"
 
 - name: Read configs into memory
   slurp:
@@ -97,6 +104,8 @@
         {{httpd_conf['content'] | b64decode}}
       httpd-keystone-main.conf: |
         {{httpd_keystone_main_conf['content'] | b64decode}}
+      httpd-keystone-admin.conf: |
+        {{httpd_keystone_admin_conf['content'] | b64decode}}
 
 
 - name: Create keystone job
