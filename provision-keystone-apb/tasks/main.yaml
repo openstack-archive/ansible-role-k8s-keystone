@@ -19,6 +19,8 @@
     - httpd-keystone-admin.conf
     - keystone-schema.yaml
 
+- include: hiera.yaml
+
 - name: Run oslo.config
   include_role:
     name: os-gen-config
@@ -27,13 +29,7 @@
     config_show_help: false
     config_show_defaults: false
     dest: "/tmp/keystone.conf"
-    config_data:
-      DEFAULT:
-        public_bind_host: "0.0.0.0"
-      database:
-        connection: "mysql+pymysql://root:weakpassword@mariadb:3306/keystone"
-      token:
-        provider: "fernet"
+    config_data: '{{keystone_config}}'
 
 - name: Read configs into memory
   slurp:

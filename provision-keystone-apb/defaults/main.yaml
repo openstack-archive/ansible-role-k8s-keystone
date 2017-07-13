@@ -1,3 +1,14 @@
 coe_host: "https://rhev-i32c-03.mpc.lab.eng.bos.redhat.com:6443"
 kube_context: "kubernetes-admin@kubernetes"
 config_file: /root/.kube/config
+
+hiera_data: {}
+hiera_data_file: ''
+
+keystone_config:
+  DEFAULT:
+    public_bind_host: "0.0.0.0"
+  database:
+    connection: "mysql+pymysql://root:weakpassword@mariadb:3306/keystone"
+  token:
+    provider: "fernet"

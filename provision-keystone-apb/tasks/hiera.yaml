@@ -2,7 +2,8 @@
   include_role:
     name: 'ansible-role-k8s-tripleo'
   vars:
-    hieradata:
+    hieradata: '{{hiera_data}}'
+    hieradata_file: '{{hiera_data_file}}'
     schema:
       keystone::admin_token: DEFAULT.admin_token
       keystone::admin_workers: eventlet_server.admin_workers
@@ -27,6 +28,7 @@
       keystone::rabbit_password: oslo_messaging_rabbit.rabbit_password
       keystone::rabbit_host: oslo_messaging_rabbit.rabbit_host
     fact_variable: 'keystone_config'
+
 
 #     keystone::admin_password: DEFAULT.admin_password ?
 #      keystone::service_name: 'httpd'
