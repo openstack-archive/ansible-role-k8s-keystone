@@ -1,6 +1,7 @@
 coe_host: "https://rhev-i32c-03.mpc.lab.eng.bos.redhat.com:6443"
 kube_context: "kubernetes-admin@kubernetes"
 config_file: /root/.kube/config
+action: provision
 
 hiera_data: {}
 hiera_data_file: ''
