@@ -21,15 +21,12 @@
 
 - include: hiera.yaml
 
-- name: Run oslo.config
-  include_role:
-    name: os-gen-config
-  vars:
-    config_schema: "/tmp/keystone-schema.yaml"
-    config_show_help: false
-    config_show_defaults: false
-    dest: "/tmp/keystone.conf"
-    config_data: '{{keystone_config}}'
+- name: Generate config files
+  config_template:
+    src: 'templates/base.conf.j2'
+    dest: '/tmp/keystone.conf'
+    config_overrides: '{{keystone_config}}'
+    config_type: 'ini'
 
 - name: Read configs into memory
   slurp:
