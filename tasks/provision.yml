@@ -9,10 +9,11 @@
   register: create_project
 
 - name: Upload config files
-  template: src="{{item}}"
-            dest="/tmp/{{item}}"
-            backup=yes
-            mode=0644
+  template:
+    src: "{{item}}"
+    dest: /tmp/{{item}}
+    backup: yes
+    mode: 0644
   with_items:
     - httpd.conf
     - httpd-keystone-main.conf
@@ -23,10 +24,10 @@
 
 - name: Generate config files
   config_template:
-    src: 'templates/base.conf.j2'
-    dest: '/tmp/keystone.conf'
+    src: base.conf.j2
+    dest: /tmp/keystone.conf
     config_overrides: '{{keystone_config}}'
-    config_type: 'ini'
+    config_type: ini
 
 - name: Read configs into memory
   slurp:
