@@ -1,13 +1,3 @@
-- name: Create project
-  k8s_v1_namespace:
-    host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
-    name: openstack
-    state: present
-    debug: yes
-  register: create_project
-
 - name: Upload config files
   template:
     src: "{{item}}"
@@ -20,7 +10,7 @@
     - httpd-keystone-admin.conf
     - keystone-schema.yaml
 
-- include: hiera.yaml
+- include: hiera.yml
 
 - name: Generate config files
   config_template:
