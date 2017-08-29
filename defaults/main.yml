@@ -13,3 +13,6 @@ keystone_config:
     connection: "mysql+pymysql://root:weakpassword@mariadb:3306/keystone"
   token:
     provider: "fernet"
+
+  admin_user: 'admin'
+  admin_password: 'weakpassword'

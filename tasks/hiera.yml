@@ -5,6 +5,10 @@
     hieradata: '{{hiera_data}}'
     hieradata_file: '{{hiera_data_file}}'
     schema:
+      # NOTE(flaper87): Needed for bootstrap
+      # operations
+      keystone::admin_password: admin_password
+
       keystone::admin_token: DEFAULT.admin_token
       keystone::admin_workers: eventlet_server.admin_workers
       keystone::public_workers: eventlet_server.public_workers
@@ -27,11 +31,11 @@
       keystone::rabbit_userid: oslo_messaging_rabbit.rabbit_userid
       keystone::rabbit_password: oslo_messaging_rabbit.rabbit_password
       keystone::rabbit_host: oslo_messaging_rabbit.rabbit_host
+    default: '{{keystone_config}}'
     fact_variable: 'keystone_config'
 
 
-#     keystone::admin_password: DEFAULT.admin_password ?
-#      keystone::service_name: 'httpd'
+#      ?
 #      keystone::cron::token_flush::destination: '/dev/null'
 #      keystone::roles::admin::password: 211937d10baf281179d64c64533af6fcc1aa7475
 #      keystone::roles::admin::email: 'root@localhost'

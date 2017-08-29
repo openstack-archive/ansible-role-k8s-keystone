@@ -138,9 +138,12 @@
         config_map:
           name: keystone
       - name: keystone-fernet
+        hostPath:
+          # directory location on host
+          path: /tmp/keystone-fernet
     state: present
 
-- name: Create keystone fernet job
+- name: Keystone fernet bootstrap
   k8s_v1_job:
     host: "{{coe_host}}"
     context: "{{kube_context}}"
@@ -166,7 +169,59 @@
         config_map:
           name: keystone
       - name: keystone-fernet
+        hostPath:
+          # directory location on host
+          path: /tmp/keystone-fernet
     state: present
+
+- name: Keystone bootstrap
+  k8s_v1_job:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: keystone-bootstrap
+    namespace: openstack
+    state: present
+    restart_policy: OnFailure
+    containers:
+      - image: tripleoupstream/centos-binary-keystone
+        name: keystone-bootstrap
+        # NOTE(flaper87): We might want to set bootstrap URLs, project name, etc
+        command:
+          - keystone-manage
+          - --config-file
+          - /var/lib/kolla/config_files/keystone.conf
+          - bootstrap
+          - --bootstrap-password
+          - '{{keystone_config.admin_password}}'
+#          - --bootstrap-admin-url
+#          - http://keystone:35357/v3
+#          - --bootstrap-internal-url
+#          - http://keystone:5000/v3
+#          - --bootstrap-public-url
+#          - http://keystone:5000/v3
+#          - --bootstrap-region-id
+#          - RegionOne
+        env:
+          - name: KOLLA_CONFIG_STRATEGY
+            value: COPY_ALWAYS
+          - name: KOLLA_BOOTSTRAP
+            value: ''
+        volume_mounts:
+        - name: kolla-config
+          mountPath: /var/lib/kolla/config_files/
+        - name: keystone-fernet
+          mountPath: /etc/keystone/fernet-keys
+    volumes:
+      - name: kolla-config
+        config_map:
+          name: keystone
+      - name: keystone-fernet
+        hostPath:
+          # directory location on host
+          path: /tmp/keystone-fernet
+    state: present
+
 
 - name: Create keystone service
   k8s_v1_service:
@@ -198,7 +253,7 @@
       app: keystone-api
     containers:
       - name: keystone-api
-        image: docker.io/kolla/centos-binary-keystone:3.0.3
+        image: tripleoupstream/centos-binary-keystone
         imagePullPolicy: IfNotPresent
         env:
         - name: KOLLA_CONFIG_STRATEGY
@@ -220,5 +275,8 @@
         config_map:
           name: keystone
       - name: keystone-fernet
+        hostPath:
+          # directory location on host
+          path: /tmp/keystone-fernet
     state: present
   register: create_service
