@@ -4,7 +4,7 @@
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone-fernet
-    namespace: openstack 
+    namespace: "{{namespace}}" 
     state: absent 
 
 - name: Delete keystone db-sync job 
@@ -13,7 +13,7 @@
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone-db-sync
-    namespace: openstack 
+    namespace: "{{namespace}}" 
     state: absent 
 
 - name: Delete keystone deployment 
@@ -22,7 +22,7 @@
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone-api
-    namespace: openstack 
+    namespace: "{{namespace}}" 
     state: absent 
 
 - name: Delete keystone service 
@@ -31,7 +31,7 @@
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone
-    namespace: openstack 
+    namespace: "{{namespace}}" 
     state: absent 
 
 - name: Delete keystone configmaps 
@@ -41,6 +41,6 @@
     context: "{{kube_context}}"
     kubeconfig: "{{config_file}}"
     name: keystone
-    namespace: openstack 
+    namespace: "{{namespace}}" 
     state: absent 
     debug: yes
