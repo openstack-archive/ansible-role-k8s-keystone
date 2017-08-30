@@ -192,16 +192,24 @@
           - --config-file
           - /var/lib/kolla/config_files/keystone.conf
           - bootstrap
+          - --bootstrap-username
+          - '{{keystone_config.admin_username}}'
           - --bootstrap-password
           - '{{keystone_config.admin_password}}'
-#          - --bootstrap-admin-url
-#          - http://keystone:35357/v3
-#          - --bootstrap-internal-url
-#          - http://keystone:5000/v3
-#          - --bootstrap-public-url
-#          - http://keystone:5000/v3
-#          - --bootstrap-region-id
-#          - RegionOne
+          - --bootstrap-role-name
+          - '{{keystone_config.admin_role_name}}'
+          - --bootstrap-project-name
+          - '{{keystone_config.admin_project_name}}'
+          - --bootstrap-service-name
+          - '{{keystone_config.admin_service_name}}'
+          - --bootstrap-admin-url
+          - http://keystone:35357/v3
+          - --bootstrap-internal-url
+          - http://keystone:5000/v3
+          - --bootstrap-public-url
+          - http://keystone:5000/v3
+          - --bootstrap-region-id
+          - RegionOne
         env:
           - name: KOLLA_CONFIG_STRATEGY
             value: COPY_ALWAYS
