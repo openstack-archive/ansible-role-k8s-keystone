@@ -288,3 +288,29 @@
           path: /tmp/keystone-fernet
     state: present
   register: create_service
+
+- set_fact:
+    clouds_yaml: |
+      clouds:
+        {{namespace}}:
+          region_name: RegionOne
+          identity_api_version: 3
+          auth:
+            username: '{{keystone_config.admin_username}}'
+            password: '{{keystone_config.admin_password}}'
+            project_name: '{{keystone_config.admin_project_name}}'
+            user_domain_name: '{{keystone_config.admin_domain_name}}'
+            project_domain_name: '{{keystone_config.admin_domain_name}}'
+            auth_url: 'http://keystone:5000/v3'
+
+- name: Create keystone secrets
+  k8s_v1_secret:
+    host: "{{coe_host}}"
+    context: "{{kube_context}}"
+    kubeconfig: "{{config_file}}"
+    name: '{{clouds_config}}'
+    namespace: "{{namespace}}"
+    state: present
+    data:
+      clouds.yaml: |
+        {{clouds_yaml | b64encode}}
