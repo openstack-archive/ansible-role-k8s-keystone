@@ -8,6 +8,10 @@
       # NOTE(flaper87): Needed for bootstrap
       # operations
       keystone::admin_password: admin_password
+      keystone::db::mysql::dbname: db.db_name
+      keystone::db::mysql::host: db.host
+      keystone::db::mysql::password: db.password
+      keystone::db::mysql::user: db.user
 
       keystone::admin_token: DEFAULT.admin_token
       keystone::admin_workers: eventlet_server.admin_workers

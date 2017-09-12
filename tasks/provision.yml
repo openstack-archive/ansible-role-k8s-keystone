@@ -91,6 +91,13 @@
       httpd-keystone-admin.conf: |
         {{httpd_keystone_admin_conf['content'] | b64decode}}
 
+- name: Create keystone database
+  include_role:
+    name: ansible-role-k8s-tripleo
+    tasks_from: create-database
+  vars:
+    service_name: 'keystone'
+    database_name: 'keystone'
 
 - name: Create keystone job
   k8s_v1_job:
@@ -100,25 +107,6 @@
     name: keystone-db-sync
     namespace: "{{namespace}}"
     state: present
-    spec_template_metadata_annotations:
-      pod.beta.kubernetes.io/init-containers: '[
-          {
-            "name": "keystone-db-create",
-            "image": "tripleoupstream/centos-binary-mariadb",
-            "imagePullPolicy": "IfNotPresent",
-            "restartPolicy": "OnFailure",
-            "command": [
-              "mysql",
-              "-h",
-              "mariadb",
-              "-u",
-              "root",
-              "--password=weakpassword",
-              "-e",
-              "create database if not exists keystone;"
-            ]
-          }
-        ]'
     restart_policy: OnFailure
     containers:
       - image: tripleoupstream/centos-binary-keystone

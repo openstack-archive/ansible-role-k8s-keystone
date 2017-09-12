@@ -9,6 +9,10 @@ hiera_data_file: ''
 
 clouds_config: 'clouds-secret'
 
+mariadb_config:
+  host: mariadb
+  root_password: weakpassword
+
 keystone_config:
   DEFAULT:
     public_bind_host: "0.0.0.0"
