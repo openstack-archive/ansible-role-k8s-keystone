@@ -43,8 +43,8 @@
   ignore_errors: yes
   k8s_v1_config_map:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: keystone
     namespace: "{{namespace}}"
     state: present
@@ -102,8 +102,8 @@
 - name: Create keystone job
   k8s_v1_job:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: keystone-db-sync
     namespace: "{{namespace}}"
     state: present
@@ -134,8 +134,8 @@
 - name: Keystone fernet bootstrap
   k8s_v1_job:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: keystone-fernet
     namespace: "{{namespace}}"
     state: present
@@ -165,8 +165,8 @@
 - name: Keystone bootstrap
   k8s_v1_job:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: keystone-bootstrap
     namespace: "{{namespace}}"
     state: present
@@ -222,8 +222,8 @@
 - name: Create keystone service
   k8s_v1_service:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: keystone
     namespace: "{{namespace}}"
     state: present
@@ -239,8 +239,8 @@
 - name: Create keystone deployment
   k8s_v1beta1_deployment:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: keystone-api
     namespace: "{{namespace}}"
     replicas: 1
@@ -294,8 +294,8 @@
 - name: Create keystone secrets
   k8s_v1_secret:
     host: "{{coe_host}}"
-    context: "{{kube_context}}"
-    kubeconfig: "{{config_file}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
     name: '{{clouds_config}}'
     namespace: "{{namespace}}"
     state: present

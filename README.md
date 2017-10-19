@@ -16,9 +16,9 @@ Role Variables
 | Name              | Default Value       | Description          |
 |-------------------|---------------------|----------------------|
 | `action` | `provision` | List of tasks to run. |
-| `core_host` | `https://rhev-i32c-03.mpc.lab.eng.bos.redhat.com:6443` |  |
-| `kube_context` | `kubernetes-admin@kubernetes` |  |
-| `config_file` | `/root/.kube/config` |  |
+| `coe_host` | |  |
+| `coe_config_context` | |  |
+| `coe_config_file` | |  |
 
 
 Dependencies
@@ -32,8 +32,3 @@ Example Playbook
     - hosts: all
       roles:
          - tripleo.k8s-keystone
-
-License
--------
-
-MIT
