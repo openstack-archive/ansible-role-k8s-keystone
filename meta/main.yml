@@ -1,0 +1,22 @@
+galaxy_info:
+  author: Flavio Percoco
+  description:
+  company: Red Hat
+  license: Apache v2
+  min_ansible_version: 2.3
+
+  platforms:
+  - name: EL
+    versions:
+      - 7
+
+  galaxy_tags:
+    - openstack
+    - kubernetes
+    - keystone
+
+dependencies:
+  - role: ansible.kubernetes-modules
+    install_python_requirements: no
+
+  - role: ansible-role-k8s-tripleo
