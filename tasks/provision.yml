@@ -237,7 +237,7 @@
   register: create_service
 
 - name: Create keystone deployment
-  k8s_v1beta1_deployment:
+  k8s_apps_v1beta1_deployment:
     host: "{{coe_host}}"
     context: "{{coe_config_context}}"
     kubeconfig: "{{coe_config_file}}"

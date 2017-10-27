@@ -1,0 +1,26 @@
+galaxy_info:
+  author: Flavio Percoco
+  description:
+  company: Red Hat
+  license: Apache v2
+  min_ansible_version: 2.3
+
+  platforms:
+  - name: EL
+    versions:
+      - 7
+
+  galaxy_tags:
+    - openstack
+    - kubernetes
+    - keystone
+
+dependencies:
+  - role: ansible.kubernetes-modules
+    install_python_requirements: no
+
+# NOTE(flaper87): We are vendoring config_template in ansible-role-k8s-tripleo
+# for now until it's split into its own package.
+#  - role: openstack-ansible-plugins
+
+  - role: ansible-role-k8s-tripleo
