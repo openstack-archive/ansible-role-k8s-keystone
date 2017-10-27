@@ -1,0 +1,15 @@
+- project:
+    name: openstack/ansible-role-k8s-keystone
+    check:
+      jobs:
+        - ansible-role-k8s-keystone-kubernetes-centos
+
+- job:
+    name: ansible-role-k8s-keystone-kubernetes-centos
+    parent:  ansible-role-k8s-base
+    nodeset: ansible-role-k8s-centos
+    vars:
+      coe: kubernetes
+      project_name: ansible-role-k8s-keystone
+    required-projects:
+      - openstack/ansible-role-k8s-mariadb
