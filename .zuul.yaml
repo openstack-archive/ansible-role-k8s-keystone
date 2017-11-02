@@ -22,5 +22,7 @@
     vars:
       coe: openshift
       project_name: ansible-role-k8s-keystone
+      ansible_role_k8s_required:
+        - ansible-role-k8s-mariadb
     required-projects:
       - openstack/ansible-role-k8s-mariadb
