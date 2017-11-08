@@ -8,7 +8,6 @@
     - httpd.conf
     - httpd-keystone-main.conf
     - httpd-keystone-admin.conf
-    - keystone-schema.yaml
 
 - include: hiera.yml
 
