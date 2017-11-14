@@ -1,0 +1,18 @@
+---
+- hosts: all
+  tasks:
+    - name: Register Glance in Keystone
+      include_role:
+        name: ansible-role-k8s-tripleo
+        tasks_from: bootstrap-service-endpoints
+      vars:
+        service_name: 'test'
+        service_type: 'image'
+        service_region: 'RegionOne'
+        service_project: 'http://test.com:8080'
+        service_password: 'http://test.com:8080'
+        service_username: 'http://test.com:8080'
+        service_internal_url: 'http://test.com:8080'
+        service_public_url: 'http://test.com:8080'
+        service_admin_url: 'http://test.com:8080'
+      delegate_to: "primary"
