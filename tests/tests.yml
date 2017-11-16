@@ -4,8 +4,8 @@
     name: ansible-role-k8s-tripleo
     tasks_from: bootstrap-service-endpoints
   vars:
-    service_name: 'test'
     service_type: 'image'
+    service_name: 'test'
     service_region: 'RegionOne'
     service_project: 'http://test.com:8080'
     service_password: 'http://test.com:8080'
