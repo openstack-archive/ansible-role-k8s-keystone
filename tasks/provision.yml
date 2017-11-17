@@ -98,6 +98,24 @@
     service_name: 'keystone'
     database_name: 'keystone'
 
+# NOTE(flaper87): Requesting a PVC should probably not be the default, explore
+# using secrets for the fernet keys
+- name: Create keystone PVC
+  k8s_v1_persitent_volume_claim:
+    host: "{{coe_host}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
+    name: keystone-fernet
+    namespace: "{{namespace}}"
+    state: present
+    spec:
+      accessModes:
+        - ReadWriteMany
+      storageClassName: slow
+      resources:
+        requests:
+          storage: 1Gi
+
 - name: Create keystone job
   k8s_v1_job:
     host: "{{coe_host}}"
@@ -125,9 +143,8 @@
         config_map:
           name: keystone
       - name: keystone-fernet
-        hostPath:
-          # directory location on host
-          path: /tmp/keystone-fernet
+        persistentVolumeClaim:
+          claimName: keystone-fernet
     state: present
 
 - name: Keystone fernet bootstrap
@@ -156,9 +173,8 @@
         config_map:
           name: keystone
       - name: keystone-fernet
-        hostPath:
-          # directory location on host
-          path: /tmp/keystone-fernet
+        persistentVolumeClaim:
+          claimName: keystone-fernet
     state: present
 
 - name: Keystone bootstrap
@@ -212,9 +228,8 @@
         config_map:
           name: keystone
       - name: keystone-fernet
-        hostPath:
-          # directory location on host
-          path: /tmp/keystone-fernet
+        persistentVolumeClaim:
+          claimName: keystone-fernet
     state: present
 
 
