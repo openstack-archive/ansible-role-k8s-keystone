@@ -175,6 +175,27 @@
           claimName: keystone-fernet
     state: present
 
+- name: Create keystone service
+  k8s_v1_service:
+    host: "{{coe_host}}"
+    context: "{{coe_config_context}}"
+    kubeconfig: "{{coe_config_file}}"
+    name: "{{keystone_hostname}}"
+    namespace: "{{namespace}}"
+    state: present
+    ports:
+      - port: 5000
+        name: keystone-api-public
+      - port: 35357
+        name: keystone-api-admin
+    selector:
+      app: keystone-api
+  register: keystone_service
+
+- set_fact:
+    keystone_address: "{{keystone_service.service.spec.cluster_ip}}"
+  when: keystone_use_service_ip
+
 - name: Keystone bootstrap
   k8s_v1_job:
     host: "{{coe_host}}"
@@ -204,11 +225,11 @@
           - --bootstrap-service-name
           - '{{keystone_config.admin_service_name}}'
           - --bootstrap-admin-url
-          - http://keystone:35357/v3
+          - "http://{{keystone_address}}:35357/v3"
           - --bootstrap-internal-url
-          - http://keystone:5000/v3
+          - "http://{{keystone_address}}:5000/v3"
           - --bootstrap-public-url
-          - http://keystone:5000/v3
+          - "http://{{keystone_address}}:5000/v3"
           - --bootstrap-region-id
           - RegionOne
         env:
@@ -229,24 +250,6 @@
         persistentVolumeClaim:
           claimName: keystone-fernet
     state: present
-
-
-- name: Create keystone service
-  k8s_v1_service:
-    host: "{{coe_host}}"
-    context: "{{coe_config_context}}"
-    kubeconfig: "{{coe_config_file}}"
-    name: keystone
-    namespace: "{{namespace}}"
-    state: present
-    ports:
-      - port: 5000
-        name: keystone-api-public
-      - port: 35357
-        name: keystone-api-admin
-    selector:
-      app: keystone-api
-  register: create_service
 
 - name: Create keystone deployment
   k8s_apps_v1beta1_deployment:
