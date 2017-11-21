@@ -6,24 +6,69 @@
     executable: /bin/bash
   register: keystone_ip
 
+- set_fact:
+    keystone_ip: "{{keystone_ip.stdout}}"
+
+- name: Run busybox
+  shell:
+    cmd: |
+      cat <<EOF | kubectl create -f -
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        name: busybox
+        namespace: {{namespace}}
+      spec:
+        containers:
+        - image: busybox
+          command:
+            - sleep
+            - "7200"
+          imagePullPolicy: IfNotPresent
+          name: busybox
+        restartPolicy: Always
+      EOF
+    executable: /bin/bash
+
+- name: Test DNS with busybox
+  shell:
+    cmd: |
+      kubectl exec --namespace {{namespace}} -ti busybox -- nslookup kubernetes.default
+      kubectl exec --namespace {{namespace}} -ti busybox -- nslookup mariadb
+      kubectl exec --namespace {{namespace}} -ti busybox -- nslookup keystone
+      kubectl exec --namespace {{namespace}} -ti busybox -- ping -c 4 mariadb
+      kubectl exec --namespace {{namespace}} -ti busybox -- ping -c 4 keystone
+      exit $?
+    executable: /bin/bash
+  register: busybox_output
+  retries: 10
+
+- debug:
+    msg: "{{busybox_output.stdout}}"
+
 - name: Wait for keystone to become available
   wait_for:
-    host={{keystone_ip.stdout}}
-    port=35357
-    delay=2
-    timeout=300
+    host: "{{keystone_ip}}"
+    port: "{{item}}"
+    delay: 2
+    timeout: 300
+  with_items:
+    - 35357
+    - 5000
 
-- name: Register Glance in Keystone
-  include_role:
-    name: ansible-role-k8s-tripleo
-    tasks_from: bootstrap-service-endpoints
-  vars:
-    service_name: 'test'
-    service_type: 'image'
-    service_region: 'RegionOne'
-    service_project: 'http://test.com:8080'
-    service_password: 'http://test.com:8080'
-    service_username: 'http://test.com:8080'
-    service_internal_url: 'http://test.com:8080'
-    service_public_url: 'http://test.com:8080'
-    service_admin_url: 'http://test.com:8080'
+- name: Copy tempests config
+  become: true
+  template:
+    src: templates/tempest.conf
+    dest: /etc/tempest/tempest.conf
+
+- name: Run tempest
+  shell:
+    cmd: |
+      set -x
+      set -e
+      tempest init tempest
+      cd tempest
+      tempest run -r identity
+    executable: /bin/bash
+  register: tempest_output
