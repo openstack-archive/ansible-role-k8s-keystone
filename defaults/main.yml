@@ -9,6 +9,10 @@ hiera_data_file: ''
 
 clouds_config: 'clouds-secret'
 
+keystone_hostname: "keystone"
+keystone_address: "{{keystone_hostname}}"
+keystone_use_service_ip: true
+
 mariadb_config:
   host: mariadb
   root_password: weakpassword
@@ -25,5 +29,5 @@ keystone_config:
   admin_role_name: 'admin'
   admin_project_name: 'admin'
   admin_service_name: 'keystone'
-  admin_domain_name: 'default'
+  admin_domain_name: 'Default'
   admin_password: 'weakpassword'
