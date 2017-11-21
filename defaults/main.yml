@@ -25,5 +25,5 @@ keystone_config:
   admin_role_name: 'admin'
   admin_project_name: 'admin'
   admin_service_name: 'keystone'
-  admin_domain_name: 'default'
+  admin_domain_name: 'Default'
   admin_password: 'weakpassword'
