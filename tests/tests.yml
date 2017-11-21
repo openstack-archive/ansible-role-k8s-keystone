@@ -6,24 +6,53 @@
     executable: /bin/bash
   register: keystone_ip
 
+- set_fact:
+    keystone_ip: "{{keystone_ip.stdout}}"
+
 - name: Wait for keystone to become available
   wait_for:
-    host={{keystone_ip.stdout}}
-    port=35357
-    delay=2
-    timeout=300
+    host: "{{keystone_ip}}"
+    port: "{{item}}"
+    delay: 2
+    timeout: 300
+  with_items:
+    - 35357
+    - 5000
 
-- name: Register Glance in Keystone
-  include_role:
-    name: ansible-role-k8s-tripleo
-    tasks_from: bootstrap-service-endpoints
-  vars:
-    service_name: 'test'
-    service_type: 'image'
-    service_region: 'RegionOne'
-    service_project: 'http://test.com:8080'
-    service_password: 'http://test.com:8080'
-    service_username: 'http://test.com:8080'
-    service_internal_url: 'http://test.com:8080'
-    service_public_url: 'http://test.com:8080'
-    service_admin_url: 'http://test.com:8080'
+- name: Test keystone jobs completion
+  shell:
+    cmd: |
+      set -ex
+      rst=$(kubectl --namespace {{namespace}} get jobs {{item}} --template={%raw%}"{{.status.succeeded}}"{%endraw%})
+      if [ "$rst" == "1" ]; then
+          exit 0
+      fi
+      exit 1
+    executable: /bin/bash
+  retries: 10
+  delay: 2
+  register: task_result
+  until: task_result.rc == 0
+  with_items:
+    - keystone-createdb
+    - keystone-db-sync
+    - keystone-fernet
+    - keystone-bootstrap
+
+
+- name: Copy tempests config
+  become: true
+  template:
+    src: templates/tempest.conf
+    dest: /etc/tempest/tempest.conf
+
+- name: Run tempest
+  shell:
+    cmd: |
+      set -x
+      set -e
+      tempest init tempest
+      cd tempest
+      tempest run -r identity
+    executable: /bin/bash
+  register: tempest_output
