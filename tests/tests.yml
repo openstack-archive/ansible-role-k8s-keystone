@@ -1,4 +1,18 @@
 ---
+- name: Get keystone cluster ip
+  shell:
+    cmd: |
+      kubectl get service keystone --namespace {{namespace}} --template={%raw%}{{.spec.clusterIP}}{%endraw%}
+    executable: /bin/bash
+  register: keystone_ip
+
+- name: Wait for keystone to become available
+  wait_for:
+    host={{keystone_ip.stdout}}
+    port=35357
+    delay=2
+    timeout=300
+
 - name: Register Glance in Keystone
   include_role:
     name: ansible-role-k8s-tripleo
