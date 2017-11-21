@@ -6,24 +6,25 @@
     executable: /bin/bash
   register: keystone_ip
 
+- set_fact:
+    keystone_ip: "{{keystone_ip.stdout}}"
+
 - name: Wait for keystone to become available
   wait_for:
-    host={{keystone_ip.stdout}}
-    port=35357
-    delay=2
-    timeout=300
+    host: "{{keystone_ip}}"
+    port: 35357
+    delay: 2
+    timeout: 300
 
-- name: Register Glance in Keystone
-  include_role:
-    name: ansible-role-k8s-tripleo
-    tasks_from: bootstrap-service-endpoints
-  vars:
-    service_name: 'test'
-    service_type: 'image'
-    service_region: 'RegionOne'
-    service_project: 'http://test.com:8080'
-    service_password: 'http://test.com:8080'
-    service_username: 'http://test.com:8080'
-    service_internal_url: 'http://test.com:8080'
-    service_public_url: 'http://test.com:8080'
-    service_admin_url: 'http://test.com:8080'
+- name: Copy tempests config
+  become: true
+  template:
+    src: templates/tempest.conf
+    dest: /etc/tempest.conf
+
+- name: Run tempest
+  shell:
+    cmd: |
+      tempest --config-file /etc/tempest.conf
+    executable: /bin/bash
+  register: tempest_output
