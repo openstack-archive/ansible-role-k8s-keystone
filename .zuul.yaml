@@ -16,6 +16,7 @@
         - ansible-role-k8s-mariadb
     required-projects:
       - openstack/ansible-role-k8s-mariadb
+      - openstack/ansible-role-k8s-keystone
 
 - job:
     name: ansible-role-k8s-keystone-openshift-centos
@@ -28,3 +29,4 @@
         - ansible-role-k8s-mariadb
     required-projects:
       - openstack/ansible-role-k8s-mariadb
+      - openstack/ansible-role-k8s-keystone
