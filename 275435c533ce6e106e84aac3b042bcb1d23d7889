@@ -1,0 +1,8 @@
+Code-Review+2: Flavio Percoco <fpercoco@redhat.com>
+Workflow+1: Flavio Percoco <fpercoco@redhat.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 01 Dec 2017 19:27:47 +0000
+Reviewed-on: https://review.openstack.org/524625
+Project: openstack/ansible-role-k8s-keystone
+Branch: refs/heads/master
