@@ -95,7 +95,6 @@
     name: ansible-role-k8s-tripleo
     tasks_from: create-database
   vars:
-    service_name: 'keystone'
     database_name: 'keystone'
 
 # NOTE(flaper87): Requesting a PVC should probably not be the default, explore
