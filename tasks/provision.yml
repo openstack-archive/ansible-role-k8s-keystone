@@ -130,18 +130,8 @@
             value: COPY_ALWAYS
           - name: KOLLA_BOOTSTRAP
             value: ''
-        volume_mounts:
-        - name: kolla-config
-          mountPath: /var/lib/kolla/config_files/
-        - name: keystone-fernet
-          mountPath: /etc/keystone/fernet-keys
-    volumes:
-      - name: kolla-config
-        config_map:
-          name: keystone
-      - name: keystone-fernet
-        persistentVolumeClaim:
-          claimName: keystone-fernet
+        volume_mounts: "{{keystone_mounts + keystone_mounts_extra}}"
+    volumes: "{{keystone_volumes + keystone_volumes_extra}}"
     state: present
 
 - name: Keystone fernet bootstrap
@@ -160,18 +150,8 @@
         env:
           - name: KOLLA_CONFIG_STRATEGY
             value: COPY_ALWAYS
-        volume_mounts:
-        - name: kolla-config
-          mountPath: /var/lib/kolla/config_files/
-        - name: keystone-fernet
-          mountPath: /etc/keystone/fernet-keys
-    volumes:
-      - name: kolla-config
-        config_map:
-          name: keystone
-      - name: keystone-fernet
-        persistentVolumeClaim:
-          claimName: keystone-fernet
+        volume_mounts: "{{keystone_mounts + keystone_mounts_extra}}"
+    volumes: "{{keystone_volumes + keystone_volumes_extra}}"
     state: present
 
 - name: Create keystone service
@@ -236,18 +216,8 @@
             value: COPY_ALWAYS
           - name: KOLLA_BOOTSTRAP
             value: ''
-        volume_mounts:
-        - name: kolla-config
-          mountPath: /var/lib/kolla/config_files/
-        - name: keystone-fernet
-          mountPath: /etc/keystone/fernet-keys
-    volumes:
-      - name: kolla-config
-        config_map:
-          name: keystone
-      - name: keystone-fernet
-        persistentVolumeClaim:
-          claimName: keystone-fernet
+        volume_mounts: "{{keystone_mounts + keystone_mounts_extra}}"
+    volumes: "{{keystone_volumes + keystone_volumes_extra}}"
     state: present
 
 - name: Create keystone deployment
@@ -275,18 +245,8 @@
             containerPort: 5000
           - name: api-admin
             containerPort: 35357
-        volume_mounts:
-        - name: kolla-config
-          mountPath: /var/lib/kolla/config_files/
-        - name: keystone-fernet
-          mountPath: /etc/keystone/fernet-keys
-    volumes:
-      - name: kolla-config
-        config_map:
-          name: keystone
-      - name: keystone-fernet
-        persistentVolumeClaim:
-          claimName: keystone-fernet
+        volume_mounts: "{{keystone_mounts + keystone_mounts_extra}}"
+    volumes: "{{keystone_volumes + keystone_volumes_extra}}"
     state: present
   register: create_service
 
