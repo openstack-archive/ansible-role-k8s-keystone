@@ -2,7 +2,11 @@
     name: openstack/ansible-role-k8s-keystone
     check:
       jobs:
-        - ansible-role-k8s-keystone-kubernetes-centos
+        - ansible-role-k8s-keystone-kubernetes-centos:
+            voting: false
+        - ansible-role-k8s-keystone-openshift-centos
+    gate:
+      jobs:
         - ansible-role-k8s-keystone-openshift-centos
 
 - job:
