@@ -4,6 +4,10 @@
       jobs:
         - ansible-role-k8s-keystone-kubernetes-centos
         - ansible-role-k8s-keystone-openshift-centos
+    gate:
+      jobs:
+        - ansible-role-k8s-keystone-kubernetes-centos
+        - ansible-role-k8s-keystone-openshift-centos
 
 - job:
     name: ansible-role-k8s-keystone-kubernetes-centos
