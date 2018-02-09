@@ -123,7 +123,7 @@
     state: present
     restart_policy: OnFailure
     containers:
-      - image: tripleoupstream/centos-binary-keystone
+      - image: "tripleomaster/centos-binary-keystone:current-tripleo"
         name: keystone-db-sync
         env:
           - name: KOLLA_CONFIG_STRATEGY
@@ -144,7 +144,7 @@
     state: present
     restart_policy: OnFailure
     containers:
-      - image: tripleoupstream/centos-binary-keystone-fernet
+      - image: "tripleomaster/centos-binary-keystone-fernet:current-tripleo"
         name: keystone-fernet-bootstrap
         command: ["kolla_keystone_bootstrap", "keystone", "keystone"]
         env:
@@ -185,7 +185,7 @@
     state: present
     restart_policy: OnFailure
     containers:
-      - image: tripleoupstream/centos-binary-keystone
+      - image: "tripleomaster/centos-binary-keystone:current-tripleo"
         name: keystone-bootstrap
         # NOTE(flaper87): We might want to set bootstrap URLs, project name, etc
         command:
@@ -233,7 +233,7 @@
       app: keystone-api
     containers:
       - name: keystone-api
-        image: tripleoupstream/centos-binary-keystone
+        image: "tripleomaster/centos-binary-keystone:current-tripleo"
         imagePullPolicy: IfNotPresent
         env:
         - name: KOLLA_CONFIG_STRATEGY
