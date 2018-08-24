@@ -7,7 +7,7 @@
 
 - job:
     name: ansible-role-k8s-keystone-kubernetes-centos
-    parent:  ansible-role-k8s-base
+    parent: ansible-role-k8s-base
     nodeset: ansible-role-k8s-centos
     vars:
       coe: kubernetes
@@ -20,7 +20,7 @@
 
 - job:
     name: ansible-role-k8s-keystone-openshift-centos
-    parent:  ansible-role-k8s-base
+    parent: ansible-role-k8s-base
     nodeset: ansible-role-k8s-centos
     vars:
       coe: openshift
