@@ -9,6 +9,7 @@
     name: ansible-role-k8s-keystone-kubernetes-centos
     parent:  ansible-role-k8s-base
     nodeset: ansible-role-k8s-centos
+    voting: false
     vars:
       coe: kubernetes
       project_name: ansible-role-k8s-keystone
@@ -22,6 +23,7 @@
     name: ansible-role-k8s-keystone-openshift-centos
     parent:  ansible-role-k8s-base
     nodeset: ansible-role-k8s-centos
+    voting: false
     vars:
       coe: openshift
       project_name: ansible-role-k8s-keystone
