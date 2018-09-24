@@ -1,0 +1,8 @@
+Code-Review+2: Alex Schultz <aschultz@redhat.com>
+Workflow+1: Alex Schultz <aschultz@redhat.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 24 Sep 2018 14:47:14 +0000
+Reviewed-on: https://review.openstack.org/604534
+Project: openstack/ansible-role-k8s-keystone
+Branch: refs/heads/master
